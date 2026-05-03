@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="CGPA Calculator — Track your academic performance with a beautiful, modern GPA and CGPA calculator. Manage semesters, subjects, and view your complete academic history.">
+    <title>CGPA Calculator — Track Your Academic Performance</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- Animated Background -->
+    <div class="bg-orbs">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Navbar -->
+    <nav id="main-navbar" class="navbar" style="display:none;">
+        <div class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            CGPA Calculator
+        </div>
+        <div class="nav-links">
+            <button class="nav-link active" data-view="dashboard">Dashboard</button>
+            <button class="nav-link" data-view="history">History</button>
+        </div>
+        <div class="navbar-right">
+            <div class="navbar-user">
+                <div class="user-avatar" id="nav-avatar">U</div>
+                <span id="nav-username">User</span>
+            </div>
+            <button id="btn-logout" class="btn btn-sm btn-secondary">Logout</button>
+        </div>
+    </nav>
+
+    <div class="app-container">
+
+        <!-- ==================== AUTH VIEW ==================== -->
+        <div id="view-auth" class="view active">
+            <div class="auth-wrapper">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <div class="logo">🎓</div>
+                        <h1>CGPA Calculator</h1>
+                        <p>Track your academic journey</p>
+                    </div>
+
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" data-tab="login">Sign In</button>
+                        <button class="auth-tab" data-tab="register">Sign Up</button>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form id="form-login" class="auth-form active">
+                        <div class="form-group">
+                            <label class="form-label" for="login-username">Username</label>
+                            <input class="form-input" type="text" id="login-username" placeholder="Enter username"
+                                required pattern="[a-zA-Z]+">
+                        </div>
+                        <div class="form-group password-group">
+                            <label class="form-label" for="login-password">Password</label>
+                            <input class="form-input" type="password" id="login-password" placeholder="Enter password"
+                                required>
+                            <button type="button" class="password-toggle" data-target="login-password">👁️</button>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 0.5rem;">Sign
+                            In</button>
+                    </form>
+
+                    <!-- Register Form -->
+                    <form id="form-register" class="auth-form">
+                        <div class="form-group">
+                            <label class="form-label" for="reg-fullname">Full Name</label>
+                            <input class="form-input" type="text" id="reg-fullname" placeholder="Enter your full name"
+                                required pattern="[a-zA-Z\s]+" title="Only alphabets and spaces allowed">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="reg-username">Username</label>
+                            <input class="form-input" type="text" id="reg-username" placeholder="Choose a username"
+                                required pattern="[a-zA-Z]+" title="Only alphabets allowed">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="reg-email">Email</label>
+                            <input class="form-input" type="email" id="reg-email" placeholder="Enter your email"
+                                required>
+                        </div>
+                        <div class="form-group password-group">
+                            <label class="form-label" for="reg-password">Password</label>
+                            <input class="form-input" type="password" id="reg-password"
+                                placeholder="Min 6 characters with special symbol" required minlength="6">
+                            <button type="button" class="password-toggle" data-target="reg-password">👁️</button>
+                        </div>
+                        <div class="form-group password-group">
+                            <label class="form-label" for="reg-confirm-password">Confirm Password</label>
+                            <input class="form-input" type="password" id="reg-confirm-password"
+                                placeholder="Confirm password" required minlength="6">
+                            <button type="button" class="password-toggle"
+                                data-target="reg-confirm-password">👁️</button>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 0.5rem;">Create
+                            Account</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== DASHBOARD VIEW ==================== -->
+        <div id="view-dashboard" class="view">
+            <div class="dashboard-content">
+
+                <!-- CGPA Overview Card -->
+                <div class="glass-card cgpa-overview">
+                    <div class="cgpa-label">Cumulative GPA</div>
+                    <div class="cgpa-value" id="cgpa-display">0.00</div>
+                    <div class="cgpa-subtitle">Your overall academic performance</div>
+                    <div class="cgpa-stats">
+                        <div class="cgpa-stat">
+                            <div class="cgpa-stat-value" id="stat-semesters">0</div>
+                            <div class="cgpa-stat-label">Semesters</div>
+                        </div>
+                        <div class="cgpa-stat">
+                            <div class="cgpa-stat-value" id="stat-credits">0</div>
+                            <div class="cgpa-stat-label">Total Credits</div>
+                        </div>
+                        <div class="cgpa-stat">
+                            <div class="cgpa-stat-value" id="stat-subjects">0</div>
+                            <div class="cgpa-stat-label">Subjects</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GPA Trend Graph -->
+                <div class="glass-card chart-container-card" style="margin-bottom: 2rem;">
+                    <div class="section-header" style="margin-bottom: 1.5rem;">
+                        <h3 class="section-title">GPA Performance Trend</h3>
+                    </div>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="gpa-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Semester Section -->
+                <div class="section-header">
+                    <h2 class="section-title">Your Semesters</h2>
+                    <button id="btn-add-semester" class="btn btn-primary btn-sm">+ Add Semester</button>
+                </div>
+
+                <div id="semester-grid" class="semester-grid">
+                    <!-- Rendered by JS -->
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==================== SEMESTER DETAIL VIEW ==================== -->
+        <div id="view-detail" class="view">
+            <div class="detail-content">
+
+                <div class="detail-header">
+                    <button id="btn-back" class="back-btn">←</button>
+                    <div class="detail-title">
+                        <h2 id="detail-sem-name">Semester</h2>
+                        <p id="detail-sem-info">Semester 1</p>
+                    </div>
+                    <div class="detail-actions">
+                        <button id="btn-edit-semester" class="btn btn-sm btn-secondary">✏️ Edit</button>
+                        <button id="btn-delete-semester" class="btn btn-sm btn-danger">🗑️ Delete</button>
+                    </div>
+                </div>
+
+                <!-- GPA Summary -->
+                <div class="gpa-summary">
+                    <div class="glass-card gpa-summary-item">
+                        <div class="gpa-summary-value" id="detail-gpa">0.00</div>
+                        <div class="gpa-summary-label">Semester GPA</div>
+                    </div>
+                    <div class="glass-card gpa-summary-item">
+                        <div class="gpa-summary-value" id="detail-credits">0</div>
+                        <div class="gpa-summary-label">Total Credits</div>
+                    </div>
+                    <div class="glass-card gpa-summary-item">
+                        <div class="gpa-summary-value" id="detail-subject-count">0</div>
+                        <div class="gpa-summary-label">Subjects</div>
+                    </div>
+                </div>
+
+                <!-- Semester Performance Chart -->
+                <div class="glass-card detail-chart-card" id="detail-chart-container"
+                    style="display: none; margin-bottom: 2rem;">
+                    <div class="section-header" style="margin-bottom: 1rem;">
+                        <h3 class="section-title">Subject Performance Breakdown</h3>
+                    </div>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="semester-detail-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Report Card Suggestions -->
+                <div id="report-card-container" class="report-card-wrap" style="display: none;">
+                    <!-- Rendered by JS -->
+                </div>
+
+                <!-- Subjects Table -->
+                <div class="glass-card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--glass-border);">
+                        <h3 style="font-size: 1rem; font-weight: 700;">Subjects</h3>
+                    </div>
+                    <div class="subjects-table-wrap">
+                        <table class="subjects-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Subject</th>
+                                    <th>Credits</th>
+                                    <th>Grade</th>
+                                    <th>Points</th>
+                                    <th>Weighted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subjects-tbody">
+                                <!-- Rendered by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Add Subject Form -->
+                <form id="add-subject-form" class="glass-card add-subject-form">
+                    <div class="form-group">
+                        <label class="form-label" for="subj-name">Subject Name</label>
+                        <input class="form-input" type="text" id="subj-name" placeholder="e.g. Data Structures"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="subj-code">Code</label>
+                        <input class="form-input" type="text" id="subj-code" placeholder="CS201">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="subj-credits">Credits</label>
+                        <input class="form-input" type="number" id="subj-credits" min="1" max="10" placeholder="3"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="subj-grade">Grade</label>
+                        <select class="form-input" id="subj-grade" required>
+                            <option value="">Grade</option>
+                            <option value="O">O (10)</option>
+                            <option value="A+">A+ (9)</option>
+                            <option value="A">A (8)</option>
+                            <option value="B+">B+ (7)</option>
+                            <option value="B">B (6)</option>
+                            <option value="C">C (5)</option>
+                            <option value="P">P (4)</option>
+                            <option value="F">F (0)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="align-self: end;">
+                        <button type="submit" class="btn btn-success btn-sm" style="height: 42px;">+ Add</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+        <!-- ==================== HISTORY VIEW ==================== -->
+        <div id="view-history" class="view">
+            <div class="history-content">
+                <div class="section-header">
+                    <h2 class="section-title">Calculation History</h2>
+                </div>
+
+                <div class="history-filters">
+                    <button class="filter-btn active" data-type="">All</button>
+                    <button class="filter-btn" data-type="semester_gpa">Semester GPA</button>
+                    <button class="filter-btn" data-type="subject_entry">Subjects</button>
+                    <button class="filter-btn" data-type="overall_cgpa">CGPA</button>
+                </div>
+
+                <div id="history-list" class="history-list">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Add/Edit Semester Modal -->
+    <div id="modal-semester" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-semester-title">Add Semester</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <form id="semester-form">
+                <input type="hidden" id="semester-form-id">
+                <div class="form-group">
+                    <label class="form-label" for="sem-name">Course</label>
+                    <input class="form-input" type="text" id="sem-name" placeholder="e.g. Fall 2025" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="sem-number">Semester Number</label>
+                    <input class="form-input" type="number" id="sem-number" min="1" max="12" placeholder="e.g. 1"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="sem-year">Academic Year</label>
+                    <input class="form-input" type="text" id="sem-year" placeholder="e.g. 2025-2026">
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Save Semester</button>
+                    <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Subject Modal -->
+    <div id="modal-edit-subject" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Edit Subject</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <form id="edit-subject-form">
+                <input type="hidden" id="edit-subj-id">
+                <div class="form-group">
+                    <label class="form-label" for="edit-subj-name">Subject Name</label>
+                    <input class="form-input" type="text" id="edit-subj-name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-subj-code">Subject Code</label>
+                    <input class="form-input" type="text" id="edit-subj-code">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-subj-credits">Credits</label>
+                    <input class="form-input" type="number" id="edit-subj-credits" min="1" max="10" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-subj-grade">Grade</label>
+                    <select class="form-input" id="edit-subj-grade" required>
+                        <option value="O">O (10)</option>
+                        <option value="A+">A+ (9)</option>
+                        <option value="A">A (8)</option>
+                        <option value="B+">B+ (7)</option>
+                        <option value="B">B (6)</option>
+                        <option value="C">C (5)</option>
+                        <option value="P">P (4)</option>
+                        <option value="F">F (0)</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Update Subject</button>
+                    <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Dialog Modal -->
+    <div id="modal-confirm" class="modal-overlay">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Confirm Action</h3>
+                <button class="modal-close"
+                    onclick="this.closest('.modal-overlay').classList.remove('active')">✕</button>
+            </div>
+            <div class="confirm-dialog">
+                <p id="confirm-message">Are you sure?</p>
+                <p class="warning-text" id="confirm-warning"></p>
+            </div>
+            <div class="modal-actions" style="justify-content: center;">
+                <button id="confirm-yes" class="btn btn-danger">Delete</button>
+                <button id="confirm-no" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Popup Modal -->
+    <div id="modal-feedback" class="modal-overlay">
+        <div class="modal feedback-modal">
+            <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
+                <button class="modal-close" id="btn-feedback-close">✕</button>
+            </div>
+            <div class="feedback-content">
+                <h2 id="feedback-title">Performance Update</h2>
+                <div class="feedback-cgpa-box">
+                    <span class="feedback-cgpa-label">Calculated CGPA</span>
+                    <span class="feedback-cgpa-value" id="feedback-cgpa">0.00</span>
+                </div>
+                <p id="feedback-message" class="feedback-message">Keep it up!</p>
+                <button class="btn btn-primary btn-full" id="btn-feedback-ok"
+                    style="margin-top: 1.5rem;">Awesome!</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
